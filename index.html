@@ -75,11 +75,11 @@
 
   <textarea id="textoReceita" placeholder="Sua receita aparecerá aqui..." readonly></textarea>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  <!-- Firebase compatível com navegadores -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAfGykxsSTGYo6SKGhhUT1r4MMPhHIl9a0",
       authDomain: "receitas-medicas-64a41.firebaseapp.com",
@@ -90,22 +90,22 @@
       measurementId: "G-EGM2BJCLVE"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
     let medicamentos = [];
     let selecionados = [];
 
     async function carregarMedicamentos() {
-      const querySnapshot = await getDocs(collection(db, "medicamentos"));
-      medicamentos = querySnapshot.docs.map(doc => doc.data());
+      const snapshot = await db.collection("medicamentos").get();
+      medicamentos = snapshot.docs.map(doc => doc.data());
     }
 
     async function carregarReceitasPadrao() {
-      const querySnapshot = await getDocs(collection(db, "receitas_padrao"));
+      const snapshot = await db.collection("receitas_padrao").get();
       const select = document.getElementById("receitaPadrao");
 
-      querySnapshot.forEach(doc => {
+      snapshot.forEach(doc => {
         const { nome, texto } = doc.data();
         const option = document.createElement("option");
         option.textContent = nome;
@@ -209,7 +209,7 @@
       alert("Receita copiada!");
     }
 
-    // Inicialização
+    // Inicializa tudo ao carregar
     carregarMedicamentos();
     carregarReceitasPadrao();
   </script>
