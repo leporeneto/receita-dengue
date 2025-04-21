@@ -14,7 +14,7 @@
     }
     textarea {
       width: 100%;
-      height: 300px;
+      height: 400px;
       margin-top: 10px;
       white-space: pre-wrap;
     }
@@ -45,15 +45,44 @@
         return;
       }
 
-      // Aqui colocaremos a lógica de geração de receita com base no peso
-      const receita = gerarReceitaPorPeso(peso);
-      document.getElementById('texto').value = receita;
-    }
+      const liqTotal = peso * 0.06; // total em litros
+      const x = Math.ceil((liqTotal / 3) * 10) / 10; // arredondado pra cima, 1 casa decimal
+      const y = Math.ceil((liqTotal * 2 / 3) * 10) / 10;
 
-    function gerarReceitaPorPeso(peso) {
-      // Exemplo de cálculo simples — substitua pela lógica real
-      const litros = Math.ceil(peso * 0.03 * 10) / 10; // arredonda para cima com 1 casa decimal
-      return `Dissolver 1 envelope em 1 litro de água fervida ou filtrada e consumir ${litros} litros em 24h.\n\nIngerir líquidos claros como água, chá ou suco até melhora dos sintomas.`;
+      const receita = `USO ORAL:
+
+1- Dipirona 500mg
+Tomar 02 cp de 6/6h se dor ou febre
+
+ou
+
+2- Paracetamol 500mg
+Tomar 01 cp de 6/6h se dor ou febre
+
+3- Ondansetrona 8mg
+Tomar 01 cp de 8/8h se náuseas ou vômitos
+
+4- Loratadina 10mg
+Tomar 01 cp de 12/12h por até 5 dias, se coceira
+
+5- Sais de reidratação oral
+Dissolver 1 envelope em 1 litro de água fervida ou filtrada e consumir ${x} litros em 24h
+
+ORIENTAÇÕES:
+
+1. Fazer ingesta de líquidos claros (água, chá, suco, água de coco, etc), ao menos ${y} litros por dia;
+2. NÃO fazer uso de antiinflamatórios (p.ex.: nimesulida, diclofenaco, ibuprofeno, cetoprofeno, naproxeno) nem o uso de AAS ("aspirina");
+3. Pode alternar dipirona x paracetamol de 4/4h se necessário;
+4. Atentar ao sintomas e sinais de alarme, retornar precocemente ao pronto atendimento se:
+- Febre persistente superior a 48hrs;
+- Hipotensão (pressão baixa);
+- Vômitos persistente;
+- Dor em abdominal forte e persistente;
+- Sangramentos espontâneos;
+- Tontura/desmaio;
+`;
+
+      document.getElementById('texto').value = receita;
     }
 
     function limpar() {
