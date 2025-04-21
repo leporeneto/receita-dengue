@@ -72,10 +72,13 @@
 
   <button onclick="gerarReceita()">Gerar Receita</button>
   <button onclick="copiarReceita()">📋 Copiar Receita</button>
-  <button onclick="novaReceita()">➕Nova Receita</button>
-
+  <button onclick="abrirCadastro()">➕ Adicionar Medicamento</button>
+  
   <textarea id="textoReceita" placeholder="Sua receita aparecerá aqui..." readonly></textarea>
 
+  <button onclick="novaReceita()">➕Nova Receita</button>
+  <button onclick="salvarReceitaPadrao()">💾 Salvar Receita como Padrão</button>
+  
   <!-- Firebase compatível com navegadores -->
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
