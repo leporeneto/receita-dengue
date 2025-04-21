@@ -6,78 +6,103 @@
   <title>Gerador de Receita Médica</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      max-width: 800px;
-      margin: auto;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    select, input, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      font-size: 16px;
-      border-radius: 5px;
-    }
-    textarea {
-      width: 100%;
-      height: 300px;
-      font-family: monospace;
-      padding: 10px;
-      white-space: pre-wrap;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .med-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px;
-      border-bottom: 1px solid #eee;
-    }
-    .remove-btn {
-      background-color: crimson;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .remove-btn:hover {
-      background-color: darkred;
-    }
+  font-family: Arial, sans-serif;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+label {
+  font-weight: bold;
+  margin-top: 15px;
+  display: block;
+}
+
+select,
+input,
+button,
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+textarea {
+  height: 300px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  border: 1px solid #ccc;
+}
+
+ul {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.med-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.remove-btn {
+  background-color: crimson;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.remove-btn:hover {
+  background-color: darkred;
+}
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Gerador de Receita Médica</h1>
 
-  <h1>Gerador de Receita Médica</h1>
+    <label for="receitaPadrao">Receita Padrão:</label>
+    <select id="receitaPadrao">
+      <option value="">Escolha uma receita padrão</option>
+    </select>
 
-  <label for="receitaPadrao">Receita Padrão:</label>
-  <select id="receitaPadrao">
-    <option value="">Escolha uma receita padrão</option>
-  </select>
+    <label for="pesquisa">Pesquisar Medicamento:</label>
+    <input type="text" id="pesquisa" placeholder="Digite para buscar..." oninput="filtrarMedicamentos()" />
 
-  <label for="pesquisa">Pesquisar Medicamento:</label>
-  <input type="text" id="pesquisa" placeholder="Digite para buscar..." oninput="filtrarMedicamentos()" />
+    <ul id="listaMedicamentos"></ul>
 
-  <ul id="listaMedicamentos"></ul>
-
-  <div>
     <h3>Medicamentos Selecionados:</h3>
     <div id="selecionados"></div>
+
+    <button onclick="gerarReceita()">Gerar Receita</button>
+    <button onclick="copiarReceita()">📋 Copiar Receita</button>
+    <button onclick="abrirCadastro()">➕ Adicionar Medicamento</button>
+
+    <textarea id="textoReceita" placeholder="Sua receita aparecerá aqui..." readonly></textarea>
+
+    <button onclick="novaReceita()">➕ Nova Receita</button>
+    <button onclick="salvarReceitaPadrao()">💾 Salvar Receita como Padrão</button>
   </div>
-
-  <button onclick="gerarReceita()">Gerar Receita</button>
-  <button onclick="copiarReceita()">📋 Copiar Receita</button>
-  <button onclick="abrirCadastro()">➕ Adicionar Medicamento</button>
-  
-  <textarea id="textoReceita" placeholder="Sua receita aparecerá aqui..." readonly></textarea>
-
-  <button onclick="novaReceita()">➕Nova Receita</button>
-  <button onclick="salvarReceitaPadrao()">💾 Salvar Receita como Padrão</button>
+</body>
   
   <!-- Firebase compatível com navegadores -->
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -229,5 +254,4 @@
   carregarReceitasPadrao();
 </script>
 
-</body>
 </html>
