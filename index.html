@@ -137,12 +137,9 @@
       const termo = document.getElementById("buscaReceitaPadrao").value.toLowerCase();
       const ul = document.getElementById("listaReceitasPadrao");
       ul.innerHTML = "";
-
-      if (termo.length < 1) return;
-
+    
       receitasPadrao
         .filter(r => r.nome.toLowerCase().includes(termo))
-        .slice(0, 10)
         .forEach(receita => {
           const li = document.createElement("li");
           li.textContent = receita.nome;
