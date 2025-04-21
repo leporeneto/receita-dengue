@@ -249,6 +249,34 @@ ul {
     document.getElementById("listaMedicamentos").innerHTML = "";
   }
 
+  function abrirCadastro() {
+  window.location.href = "https://leporeneto.github.io/receitas/novo.html";
+}
+
+  function salvarReceitaPadrao() {
+  const receitaTexto = document.getElementById("textoReceita").value;
+  if (!receitaTexto) {
+    alert("Gere uma receita antes de salvar.");
+    return;
+  }
+
+  const nome = prompt("Digite um nome para salvar esta receita:");
+  if (!nome) {
+    alert("Nome da receita não informado.");
+    return;
+  }
+
+  db.collection("receitas_padrao").add({
+    nome: nome,
+    texto: receitaTexto
+  }).then(() => {
+    alert("Receita salva como padrão com sucesso!");
+    carregarReceitasPadrao(); // atualiza o dropdown
+  }).catch((error) => {
+    alert("Erro ao salvar: " + error.message);
+  });
+}
+
   // Inicialização
   carregarMedicamentos();
   carregarReceitasPadrao();
