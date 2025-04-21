@@ -1,101 +1,218 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Gerador de Receita Médica para DENGUE</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerador de Receita Médica</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 30px;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
     }
-    input, textarea, button {
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
       font-size: 16px;
-      padding: 8px;
+      border-radius: 5px;
     }
     textarea {
       width: 100%;
-      height: 400px;
-      margin-top: 10px;
+      height: 300px;
+      font-family: monospace;
+      padding: 10px;
       white-space: pre-wrap;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
-    .botoes {
-      margin-top: 10px;
+    .med-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px;
+      border-bottom: 1px solid #eee;
+    }
+    .remove-btn {
+      background-color: crimson;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .remove-btn:hover {
+      background-color: darkred;
     }
   </style>
 </head>
 <body>
-  <h2>Gerador de Receita Médica para DENGUE</h2>
 
-  <label for="peso">Informe o peso do paciente (kg):</label>
-  <input type="number" id="peso" min="1" step="0.1" placeholder="Ex: 75">
-  <button onclick="gerar()">Gerar Receita</button>
-  <button onclick="limpar()">Limpar</button>
+  <h1>Gerador de Receita Médica</h1>
 
-  <textarea id="texto" placeholder="A receita aparecerá aqui..." readonly></textarea>
+  <label for="receitaPadrao">Receita Padrão:</label>
+  <select id="receitaPadrao">
+    <option value="">Escolha uma receita padrão</option>
+  </select>
 
-  <div class="botoes">
-    <button onclick="copiar()">📋 Copiar Receita</button>
+  <label for="pesquisa">Pesquisar Medicamento:</label>
+  <input type="text" id="pesquisa" placeholder="Digite para buscar..." oninput="filtrarMedicamentos()" />
+
+  <ul id="listaMedicamentos"></ul>
+
+  <div>
+    <h3>Medicamentos Selecionados:</h3>
+    <div id="selecionados"></div>
   </div>
 
-  <script>
-    function gerar() {
-      const peso = parseFloat(document.getElementById('peso').value);
-      if (isNaN(peso) || peso <= 0) {
-        alert("Por favor, insira um peso válido.");
+  <button onclick="gerarReceita()">Gerar Receita</button>
+  <button onclick="copiarReceita()">📋 Copiar Receita</button>
+
+  <textarea id="textoReceita" placeholder="Sua receita aparecerá aqui..." readonly></textarea>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAfGykxsSTGYo6SKGhhUT1r4MMPhHIl9a0",
+      authDomain: "receitas-medicas-64a41.firebaseapp.com",
+      projectId: "receitas-medicas-64a41",
+      storageBucket: "receitas-medicas-64a41.firebasestorage.app",
+      messagingSenderId: "981098459263",
+      appId: "1:981098459263:web:9d5fe43b027a1860580f4a",
+      measurementId: "G-EGM2BJCLVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let medicamentos = [];
+    let selecionados = [];
+
+    async function carregarMedicamentos() {
+      const querySnapshot = await getDocs(collection(db, "medicamentos"));
+      medicamentos = querySnapshot.docs.map(doc => doc.data());
+    }
+
+    async function carregarReceitasPadrao() {
+      const querySnapshot = await getDocs(collection(db, "receitas_padrao"));
+      const select = document.getElementById("receitaPadrao");
+
+      querySnapshot.forEach(doc => {
+        const { nome, texto } = doc.data();
+        const option = document.createElement("option");
+        option.textContent = nome;
+        option.value = texto.startsWith("http") ? `LINK|${texto}` : texto;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById("receitaPadrao").addEventListener("change", (e) => {
+      const valor = e.target.value;
+      if (valor.startsWith("LINK|")) {
+        const url = valor.replace("LINK|", "");
+        window.open(url, "_blank");
+        e.target.value = "";
+      } else {
+        document.getElementById("textoReceita").value = valor;
+        selecionados = [];
+        atualizarSelecionados();
+      }
+    });
+
+    function filtrarMedicamentos() {
+      const termo = document.getElementById("pesquisa").value.toLowerCase();
+      const ul = document.getElementById("listaMedicamentos");
+      ul.innerHTML = "";
+
+      medicamentos
+        .filter(m => m.nome.toLowerCase().includes(termo))
+        .slice(0, 10)
+        .forEach(med => {
+          const li = document.createElement("li");
+          li.textContent = med.nome;
+          li.style.cursor = "pointer";
+          li.onclick = () => adicionarMedicamento(med);
+          ul.appendChild(li);
+        });
+    }
+
+    function adicionarMedicamento(med) {
+      if (selecionados.find(m => m.nome === med.nome)) {
+        alert("Medicamento já adicionado.");
+        return;
+      }
+      selecionados.push(med);
+      atualizarSelecionados();
+    }
+
+    function atualizarSelecionados() {
+      const container = document.getElementById("selecionados");
+      container.innerHTML = "";
+
+      selecionados.forEach((med, i) => {
+        const div = document.createElement("div");
+        div.className = "med-item";
+
+        const info = document.createElement("span");
+        info.textContent = `${med.nome}`;
+
+        const btn = document.createElement("button");
+        btn.className = "remove-btn";
+        btn.textContent = "Remover";
+        btn.onclick = () => {
+          selecionados.splice(i, 1);
+          atualizarSelecionados();
+        };
+
+        div.appendChild(info);
+        div.appendChild(btn);
+        container.appendChild(div);
+      });
+    }
+
+    function gerarReceita() {
+      if (selecionados.length === 0) {
+        alert("Adicione medicamentos ou selecione uma receita padrão.");
         return;
       }
 
-      const liqTotal = peso * 0.06; // total em litros
-      const x = Math.ceil((liqTotal / 3) * 10) / 10; // arredondado pra cima, 1 casa decimal
-      const y = Math.ceil((liqTotal * 2 / 3) * 10) / 10;
+      const porVia = {};
+      selecionados.forEach(med => {
+        const via = med.via.toUpperCase();
+        if (!porVia[via]) porVia[via] = [];
+        porVia[via].push(med);
+      });
 
-      const receita = `USO ORAL:
+      let texto = "";
+      for (const via in porVia) {
+        texto += `USO ${via}:\n\n`;
+        porVia[via].forEach((med, i) => {
+          texto += `${i + 1}- ${med.nome}\n${med.posologia}, ${med.duracao}\n\n`;
+        });
+      }
 
-1- Dipirona 500mg
-Tomar 02 cp de 6/6h se dor ou febre
-
-ou
-
-2- Paracetamol 500mg
-Tomar 01 cp de 6/6h se dor ou febre
-
-3- Ondansetrona 8mg
-Tomar 01 cp de 8/8h se náuseas ou vômitos
-
-4- Loratadina 10mg
-Tomar 01 cp de 12/12h por até 5 dias, se coceira
-
-5- Sais de reidratação oral
-Dissolver 1 envelope em 1 litro de água fervida ou filtrada e consumir ${x} litros em 24h
-
-ORIENTAÇÕES:
-
-1. Fazer ingesta de líquidos claros (água, chá, suco, água de coco, etc), ao menos ${y} litros por dia;
-2. NÃO fazer uso de antiinflamatórios (p.ex.: nimesulida, diclofenaco, ibuprofeno, cetoprofeno, naproxeno) nem o uso de AAS ("aspirina");
-3. Pode alternar dipirona x paracetamol de 4/4h se necessário;
-4. Atentar ao sintomas e sinais de alarme, retornar precocemente ao pronto atendimento se:
-- Febre persistente superior a 48hrs;
-- Hipotensão (pressão baixa);
-- Vômitos persistente;
-- Dor em abdominal forte e persistente;
-- Sangramentos espontâneos;
-- Tontura/desmaio;
-`;
-
-      document.getElementById('texto').value = receita;
+      document.getElementById("textoReceita").value = texto.trim();
     }
 
-    function limpar() {
-      document.getElementById('peso').value = "";
-      document.getElementById('texto').value = "";
+    function copiarReceita() {
+      const textarea = document.getElementById("textoReceita");
+      textarea.select();
+      document.execCommand("copy");
+      alert("Receita copiada!");
     }
 
-    function copiar() {
-      const texto = document.getElementById('texto');
-      texto.select();
-      document.execCommand('copy');
-      alert('Receita copiada com sucesso!');
-    }
+    // Inicialização
+    carregarMedicamentos();
+    carregarReceitasPadrao();
   </script>
+
 </body>
 </html>
